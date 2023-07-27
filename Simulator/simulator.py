@@ -9,7 +9,7 @@ class Simulator:
     def __init__(self):
         self.devices = []
 
-    def configure(resources, project):
+    def configure(self, resources, project):
         self.devices = []
         exchange_name = get_exchange_name(project)
         for device in resources.keys():
@@ -24,7 +24,7 @@ class Simulator:
             {"Devices instatiated": [device.name for device in self.devices]}
         )
 
-    def get_devices_list():
+    def get_devices_list(self):
         return jsonify(
             {
                 "Devices instatiated": [
