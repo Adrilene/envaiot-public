@@ -34,7 +34,7 @@ class Simulator:
             }
         )
 
-    def status(device_name, new_status=None):
+    def status(self, device_name, new_status=None):
         current_device = get_current_device(device_name, self.devices)
 
         if not current_device:
@@ -52,25 +52,25 @@ class Simulator:
 
         return current_device.set_status(new_status)
 
-    def send_message(device_name, message):
+    def send_message(self, device_name, message):
         current_device = get_current_device(device_name, self.devices)
 
         if not current_device:
-            return jsonify({"Error": f"Device Not Found {device_name}"}), 400
+            return {"Error": f"Device Not Found {device_name}"}
 
         recipient_device = message.pop("to") if "to" in message.keys() else None
 
         if recipient_device:
             recipient_device = get_current_device(message["to"], devices)
             if not recipient_device:
-                return jsonify({"Error": f"Device Not Found {device_name}"}), 400
+                return {"Error": f"Device Not Found {device_name}"}
             write_log(f"{device_name} sent {message} to {recipient_device}.")
 
         else:
             write_log(f"{device_name} published {message}")
 
-        return jsonify(
-            current_device.publisher.publish(
+        return {
+            "Success": current_device.publisher.publish(
                 message, device_name=device_name, recipient=recipient_device
             )
-        )
+        }

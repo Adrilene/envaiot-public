@@ -35,6 +35,8 @@ def index():
 
 @app.route("/configure_all", methods=["POST"])
 def configure_all():
+    global configurator, simulator, observer, effector
+
     configuration = dict(request.json)
     write_log(f"Starting {configuration['project']}...")
     errors_simulator, errors_adapter = configurator.configure_all(configuration)
@@ -43,15 +45,13 @@ def configure_all():
 
     if not errors_simulator:
         write_log(f"Simulator modeling is correct. Starting to configurate...")
-        result["simulator"] = simulator.configure(
-            configuration["resources"], configuration["project"]
-        )
+        simulator.configure(configuration["resources"], configuration["project"])
     else:
         result["simulator"] = errors_simulator
 
     if not errors_adapter:
         write_log(f"Adapter modeling is correct. Starting to configurate...")
-        result["adapter"]["observer"] = observer.configure(
+        observer.configure(
             configuration["communication"],
             configuration["scenarios"],
             configuration["project"],
@@ -61,11 +61,17 @@ def configure_all():
     else:
         result["adapter"] = errors_adapter
 
-    return jsonify(result), 200
+    if result:
+        return jsonify(result), 200
+
+    return jsonify(
+        configurator.assert_scenario(configuration["strategies"], simulator, observer)
+    )
 
 
 @app.route("/configure_simulator", methods=["POST"])
 def configure_simulator():
+    global configurator, simulator, observer, effector
     write_log(f"Configuring Simulator...")
 
     configuration = dict(request.json)
@@ -86,6 +92,7 @@ def configure_simulator():
 
 @app.route("/configure_adapter", methods=["POST"])
 def configure_adapter():
+    global configurator, simulator, observer, effector
     write_log(f"Configuring Adapter...")
 
     configuration = dict(request.json)
@@ -109,7 +116,7 @@ def configure_adapter():
 
 @app.route("/validate_scenario", methods=["POST"])
 def validate_scenario():
-    return jsonify(configurator.assert_scenario(request.json))
+    return jsonify(configurator.assert_scenario(dict(request.json)))
 
 
 @app.route("/get_logs", methods=["GET"])

@@ -53,11 +53,6 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
             self.channel,
         )
 
-    def get_adaptation_status(self):
-        if self.adaptation_status:
-            return jsonify(self.adaptation_status), 200
-        return jsonify(self.adaptation_status), 400
-
     def run(self):
         print(f"[*] Starting Observer")
         self.channel.basic_consume(
