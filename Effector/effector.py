@@ -5,7 +5,10 @@ from .strategies_interpretation import strategies_to_dict
 
 
 class Effector(PlanExecuteService):
-    def __init__(self, strategies):
+    def __init__(self):
+        self.strategies = {}
+
+    def configure(self, strategies):
         self.strategies = strategies_to_dict(strategies)
 
     def adapt(self, scenario, adapt_type):
