@@ -37,98 +37,79 @@ def index():
 def configure_all():
     configuration = dict(request.json)
     write_log(f"Starting {configuration['project']}...")
-    errors_simulator, errors_adapter = configurator.configure_all()
+    errors_simulator, errors_adapter = configurator.configure_all(configuration)
 
     result = {}
-    write_log(f"Components configured:")
+
     if not errors_simulator:
+        write_log(f"Simulator modeling is correct. Starting to configurate...")
         result["simulator"] = simulator.configure(
             configuration["resources"], configuration["project"]
         )
-        write_log(f"Simulator: {configuration['resources'], configuration['project']}")
-    else: 
+    else:
         result["simulator"] = errors_simulator
 
-    if not errors_adapter: 
+    if not errors_adapter:
+        write_log(f"Adapter modeling is correct. Starting to configurate...")
         result["adapter"]["observer"] = observer.configure(
             configuration["communication"],
             configuration["scenarios"],
-            configuration["project"]
+            configuration["project"],
         )
-        result["adapter"]["effector"] = effector.configure(
-            configuration["strategies"]
-        )
-        write_log(f"Obsever: {configuration['communication'], configuration['scenarios'],       configuration['project']}")
-        write_log(f"Effector: {configuration["strategies"]}")
-    else: 
+        result["adapter"]["effector"] = effector.configure(configuration["strategies"])
+
+    else:
         result["adapter"] = errors_adapter
 
     return jsonify(result), 200
 
+
 @app.route("/configure_simulator", methods=["POST"])
 def configure_simulator():
+    write_log(f"Configuring Simulator...")
+
     configuration = dict(request.json)
-    print(f"Starting {configuration['project']}...")
-    errors = validate_simulator(configuration)
-    if errors:
-        return jsonify(errors), 400
+    errors_simulator = configurator.configure_simulator(configuration)
 
-    print("Modelling is correct. Starting to configure simulator...")
-    result = requests.post(
-        f"{os.getenv('SIMULATOR_HOST')}/configure", json=configuration
-    )
-    if result.status_code == 200:
-        write_log(f"Simulator configurated with:")
-        write_log(f"{configuration}\n")
-        return jsonify("Simulator set!")
+    result = {}
 
-    return result
+    if not errors_simulator:
+        write_log(f"Simulator modeling is correct. Starting to configurate...")
+        result["simulator"] = simulator.configure(
+            configuration["resources"], configuration["project"]
+        )
+    else:
+        result["simulator"] = errors_simulator
+
+    return jsonify(result), 200
 
 
 @app.route("/configure_adapter", methods=["POST"])
 def configure_adapter():
+    write_log(f"Configuring Adapter...")
+
     configuration = dict(request.json)
-    print(f"Starting {configuration['project']}...")
-    errors = validate_adapter(configuration)
-    if errors:
-        return jsonify(errors), 400
-
-    write_log(f"Modelling is correct. Starting to configure adapter...")
-
+    errors_adapter = configurator.configure_adapter(configuration)
     result = {}
-    observer_configuration = {
-        "project": configuration["project"],
-        "communication": configuration["communication"],
-        "scenarios": configuration["scenarios"],
-    }
-    effector_configuration = {
-        "strategies": configuration["strategies"],
-    }
-    result["Observer"] = requests.post(
-        f"{os.getenv('OBSERVER_HOST')}/configure",
-        json=observer_configuration,
-    )
-    result["Effector"] = requests.post(
-        f"{os.getenv('EFFECTOR_HOST')}/configure",
-        json=effector_configuration,
-    )
 
-    if result["Observer"].status_code == 200 and result["Effector"].status_code == 200:
-        write_log(f"Adapter configurated with:")
-        write_log(f"Observer: {observer_configuration}")
-        write_log(f"Effector {effector_configuration}")
-        return jsonify("Adapter set!")
+    if not errors_adapter:
+        write_log(f"Adapter modeling is correct. Starting to configurate...")
+        result["adapter"]["observer"] = observer.configure(
+            configuration["communication"],
+            configuration["scenarios"],
+            configuration["project"],
+        )
+        result["adapter"]["effector"] = effector.configure(configuration["strategies"])
 
-    response = {}
-    for key, value in result.items():
-        response[key] = value.json()
+    else:
+        result["adapter"] = errors_adapter
 
-    return jsonify(response), 400
+    return jsonify(result), 200
 
 
 @app.route("/validate_scenario", methods=["POST"])
 def validate_scenario():
-    return jsonify(assert_scenario(request.json))
+    return jsonify(configurator.assert_scenario(request.json))
 
 
 @app.route("/get_logs", methods=["GET"])
