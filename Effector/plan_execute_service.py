@@ -1,9 +1,9 @@
 import os
-from datetime import datetime
 
 import requests
 from dotenv import load_dotenv
-from .utils import write_log
+from ..utils import write_log
+from ..components import simulator
 
 load_dotenv()
 
@@ -14,16 +14,16 @@ class PlanExecuteService:
         results = []
         for action in actions:
             device, action_type, body = action.split(":")
-            response = requests.get(f"{os.getenv('SIMULATOR_HOST')}/{device}/status")
-            write_log(f"{device} status is {response.json()['status']}.")
+            response = simulator.status(device)
+            write_log(f"{device} status is {response['status']}.")
 
-            if response.json()["status"] != "inactive":
+            if response["status"] != "inactive":
                 action_result = self.execute(device, action_type, body)
                 write_log(
                     f"Action performed on {device} and the result is {action_result}."
                 )
                 if action_result == "success":
-                    results.append((device, response.json()["status"]))
+                    results.append((device, response["status"]))
 
                 if action_result == "fail":
                     results.append((device, "fail"))
@@ -35,15 +35,16 @@ class PlanExecuteService:
 
     def execute(self, device, action_type, body):
         if action_type == "STATUS":
-            response = requests.post(
-                f"{os.getenv('SIMULATOR_HOST')}/{device}/status",
-                json={"new_status": body},
-            )
+            response = simulator.status(device, body)
         elif action_type == "MESSAGE":
             response = requests.post(
                 f"{os.getenv('SIMULATOR_HOST')}/{device}/send_message",
                 json={"type": "status", "body": body, "to": device},
             )
-        if response.status_code == 200:
+            response = simulator.send_message(
+                device, 
+                {"type": "status", "body": body, "to": device}
+            )
+        if "Success" in response.keys()
             return "success"
         return "fail"

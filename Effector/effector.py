@@ -1,4 +1,4 @@
-from .utils import write_log
+from ..utils import write_log
 
 from .plan_execute_service import PlanExecuteService
 from .strategies_interpretation import strategies_to_dict
@@ -12,7 +12,7 @@ class Effector(PlanExecuteService):
         self.strategies = strategies_to_dict(strategies)
 
     def adapt(self, scenario, adapt_type):
-        write_log(f"Adapting {adapt_type} for {scenario}.")
+        write_log(f"Applying {adapt_type} for {scenario}.")
         if scenario not in self.strategies.keys():
             write_log(f"{scenario} is not configured.\n")
             return "Scenario not configured."
@@ -23,9 +23,9 @@ class Effector(PlanExecuteService):
             if result[1] == "fail":
                 count_fail += 1
         if count_fail > 0:
-            return jsonify("Effector Failed"), 400
+            return {"fail": "Effector Failed"}
 
-        return jsonify("Effector Adapted Successfully"), 200
+        return {"success": "Effector Adapted Successfully"}
 
     # TODO
     # def return_to_previous_state():

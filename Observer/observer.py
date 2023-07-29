@@ -1,11 +1,7 @@
 import json
-import os
 from copy import deepcopy
 from threading import Thread
 from termcolor import colored
-
-import requests
-from dotenv import load_dotenv
 
 from .communication_service import CommunicationService
 from .connection import subscribe_in_all_queues
@@ -15,14 +11,9 @@ from .utils import (
     get_receiver_routing_key,
     get_scenario,
     get_sender_routing_key,
-    write_log,
 )
-
-self.adaptation_scenario = ""
-self.has_adapted = False
-self.has_adapted_uncertainty = False
-
-load_dotenv()
+from ..utils import write_log
+from ..components import effector
 
 
 class Observer(CommunicationService, MonitorAnalyseService, Thread):
@@ -87,11 +78,9 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
                 if adaptation != "uncertainty":
                     write_log(f"Scenario {adaptation} detected.")
                     self.adaptation_scenario = adaptation
-                    response = requests.get(
-                        f"{os.getenv('EFFECTOR_HOST')}/adapt?scenario={self.adaptation_scenario}&adapt_type=adaptation"
-                    )
+                    response = effector.adapt(self.adaptation_scenario, "adaptation")
                     self.has_adapted = True
-                    if response.status_code == 200:
+                    if "success" in response.keys():
                         self.adaptation_status = True
                         write_log(f"Adapted for {self.adaptation_scenario}.")
                         self.reset_values()
@@ -100,11 +89,10 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
                         self.adaptation_status = False
                         print(colored("[FAILED]", "red"), msg_log)
                         write_log(msg_log)
-                        response = requests.get(
-                            f"{os.getenv('EFFECTOR_HOST')}/adapt?scenario={self.adaptation_scenario}&adapt_type=uncertainty"
-                        )
+    
+                        response = effector.adapt(self.adaptation_scenario, "uncertainty")
                         self.has_adapted_uncertainty = True
-                        if response.status_code == 200:
+                        if "success" in response.keys():
                             self.adaptation_status = True
                             write_log(f"Adapted uncertainty for {self.adaptation_scenario}.")
 
@@ -116,11 +104,9 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
                         self.reset_values()
                 else:
                     write_log(f"Uncertainty detected for {self.adaptation_scenario}.")
-                    response = requests.get(
-                        f"{os.getenv('EFFECTOR_HOST')}/adapt?scenario={self.adaptation_scenario}&adapt_type=uncertainty"
-                    )
+                    response = effector.adapt(self.adaptation_scenario, "uncertainty")
                     self.has_adapted_uncertainty = True
-                    if response.status_code == 200:
+                    if "success" in response.keys():
                         msg_log = f"Adapted uncertainty for {self.adaptation_scenario}."
                         self.adaptation_status = True
                         print(colored("[SUCCESS]", "green"), msg_log)
