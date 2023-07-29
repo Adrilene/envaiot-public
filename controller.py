@@ -1,32 +1,14 @@
 import os
-from multiprocessing.dummy import Pool
-from time import sleep
 
-import requests
 from dotenv import load_dotenv
 from flask import jsonify, request, send_file
 from project import app
 
-from .utils import write_log, get_exchange_name
-from .validator_adapter import validate_adapter
-from .validator_simulator import validate_simulator
-from .assert_scenario import assert_scenario
-
-from .Configurator.configurator import Configurator
-from .Simulator.simulator import Simulator
-from .Observer.observer import Observer
-from .Effector.effector import Effector
-
-devices = []
+from .utils import write_log
+from .components import configurator, simulator, observer, effector
 
 
 load_dotenv()
-
-configurator = Configurator()
-simulator = Simulator()
-observer = Observer()
-effector = Effector()
-
 
 @app.route("/index", methods=["GET"])
 def index():
@@ -35,83 +17,42 @@ def index():
 
 @app.route("/configure_all", methods=["POST"])
 def configure_all():
-    global configurator, simulator, observer, effector
+   configuration = dict(request.json)
+   result = configurator.configure_all(configuration)
 
-    configuration = dict(request.json)
-    write_log(f"Starting {configuration['project']}...")
-    errors_simulator, errors_adapter = configurator.configure_all(configuration)
-
-    result = {}
-
-    if not errors_simulator:
-        write_log(f"Simulator modeling is correct. Starting to configurate...")
-        simulator.configure(configuration["resources"], configuration["project"])
-    else:
-        result["simulator"] = errors_simulator
-
-    if not errors_adapter:
-        write_log(f"Adapter modeling is correct. Starting to configurate...")
-        observer.configure(
-            configuration["communication"],
-            configuration["scenarios"],
-            configuration["project"],
-        )
-        result["adapter"]["effector"] = effector.configure(configuration["strategies"])
-
-    else:
-        result["adapter"] = errors_adapter
-
-    if result:
-        return jsonify(result), 200
-
-    return jsonify(
-        configurator.assert_scenario(configuration["strategies"], simulator, observer)
-    )
+    if not result:
+       write_log("All components configured correctly.")
+       return jsonify({"msg": "ok"})
+    
+    return jsonify(result), 400
 
 
 @app.route("/configure_simulator", methods=["POST"])
 def configure_simulator():
-    global configurator, simulator, observer, effector
     write_log(f"Configuring Simulator...")
 
     configuration = dict(request.json)
-    errors_simulator = configurator.configure_simulator(configuration)
+    result = configurator.configure_simulator(configuration)
 
-    result = {}
-
-    if not errors_simulator:
-        write_log(f"Simulator modeling is correct. Starting to configurate...")
-        result["simulator"] = simulator.configure(
-            configuration["resources"], configuration["project"]
-        )
-    else:
-        result["simulator"] = errors_simulator
-
-    return jsonify(result), 200
+    if not result:
+       write_log("All components configured correctly.")
+       return jsonify({"msg": "ok"})
+    
+    return jsonify(result), 400
 
 
 @app.route("/configure_adapter", methods=["POST"])
 def configure_adapter():
-    global configurator, simulator, observer, effector
     write_log(f"Configuring Adapter...")
 
     configuration = dict(request.json)
-    errors_adapter = configurator.configure_adapter(configuration)
-    result = {}
+    result = configurator.configure_adapter(configuration)
 
-    if not errors_adapter:
-        write_log(f"Adapter modeling is correct. Starting to configurate...")
-        result["adapter"]["observer"] = observer.configure(
-            configuration["communication"],
-            configuration["scenarios"],
-            configuration["project"],
-        )
-        result["adapter"]["effector"] = effector.configure(configuration["strategies"])
-
-    else:
-        result["adapter"] = errors_adapter
-
-    return jsonify(result), 200
+    if not result:
+       write_log("All components configured correctly.")
+       return jsonify({"msg": "ok"})
+    
+    return jsonify(result), 400
 
 
 @app.route("/validate_scenario", methods=["POST"])

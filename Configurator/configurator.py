@@ -10,6 +10,7 @@ from .assert_scenario import assert_scenario
 
 from ..Simulator.simulator import Simulator
 from ..utils import write_log
+from ..components import simulator, observer, effector
 
 
 devices = []
@@ -19,19 +20,66 @@ load_dotenv()
 
 
 class Configurator:
+    def configure_all(self, configuration):
+        errors_simulator = validate_simulator(configuration)
+        errors_adapter = validate_adapter(configuration)
+        result = {}
+
+        if not errors_simulator:
+            write_log(f"Simulator modeling is correct. Starting to configurate...")
+            simulator.configure(configuration["resources"], configuration["project"])
+        else:
+            result["simulator"] = errors_simulator
+
+        if not errors_adapter:
+            write_log(f"Adapter modeling is correct. Starting to configurate...")
+            observer.configure(
+                configuration["communication"],
+                configuration["scenarios"],
+                configuration["project"],
+            )
+
+        else:
+            result["adapter"] = errors_adapter
+
+        if result:
+            return result
+
     def configure_simulator(self, configuration):
         errors = validate_simulator(configuration)
-        return errors
+        result = {}
+
+        if not errors:
+            write_log(f"Simulator modeling is correct. Starting to configurate...")
+            result["simulator"] = simulator.configure(
+                configuration["resources"], configuration["project"]
+            )
+        else:
+            result["simulator"] = errors
+
+        if result:
+            return result
 
     def configure_adapter(self, configuration):
         errors = validate_adapter(configuration)
-        return errors
+        result = {}
 
-    def configure_all(self, configuration):
-        errors_simulator = validate_simulator(configuration)
-        errors_adapater = validate_adapter(configuration)
+        if not errors:
+            write_log(f"Adapter modeling is correct. Starting to configurate...")
+            result["adapter"]["observer"] = observer.configure(
+                configuration["communication"],
+                configuration["scenarios"],
+                configuration["project"],
+            )
+            result["adapter"]["effector"] = effector.configure(
+                configuration["strategies"]
+            )
 
-        return errors_simulator, errors_adapater
+        else:
+            result["adapter"] = errors
+
+        if result:
+            return result
 
     def validate_scenario():
         return jsonify(assert_scenario(request.json))
