@@ -1,7 +1,7 @@
 from flask import jsonify
 
 from .devices import Device
-from .string_operations import get_exchange_name
+from .utils import get_exchange_name
 from .utils import get_current_device, write_log
 
 
