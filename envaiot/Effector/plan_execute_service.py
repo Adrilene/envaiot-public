@@ -3,13 +3,14 @@ import os
 import requests
 from dotenv import load_dotenv
 from ..utils import write_log
-from ..components import simulator
 
 load_dotenv()
 
 
 class PlanExecuteService:
     def plan(self, actions):
+        from ..components import simulator
+
         device = ""
         results = []
         for action in actions:
@@ -34,6 +35,8 @@ class PlanExecuteService:
         return results
 
     def execute(self, device, action_type, body):
+        from ..components import simulator
+
         if action_type == "STATUS":
             response = simulator.status(device, body)
         elif action_type == "MESSAGE":
@@ -42,9 +45,8 @@ class PlanExecuteService:
                 json={"type": "status", "body": body, "to": device},
             )
             response = simulator.send_message(
-                device, 
-                {"type": "status", "body": body, "to": device}
+                device, {"type": "status", "body": body, "to": device}
             )
-        if "Success" in response.keys()
+        if "Success" in response.keys():
             return "success"
         return "fail"

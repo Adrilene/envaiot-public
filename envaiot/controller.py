@@ -2,13 +2,14 @@ import os
 
 from dotenv import load_dotenv
 from flask import jsonify, request, send_file
-from project import app
 
 from .utils import write_log
 from .components import configurator, simulator, observer, effector
 
+from . import app
 
 load_dotenv()
+
 
 @app.route("/index", methods=["GET"])
 def index():
@@ -17,13 +18,12 @@ def index():
 
 @app.route("/configure_all", methods=["POST"])
 def configure_all():
-   configuration = dict(request.json)
-   result = configurator.configure_all(configuration)
-
+    configuration = dict(request.json)
+    result = configurator.configure_all(configuration)
     if not result:
-       write_log("All components configured correctly.")
-       return jsonify({"msg": "ok"})
-    
+        write_log("All components configured correctly.")
+        return jsonify({"msg": "ok"})
+
     return jsonify(result), 400
 
 
@@ -35,9 +35,9 @@ def configure_simulator():
     result = configurator.configure_simulator(configuration)
 
     if not result:
-       write_log("All components configured correctly.")
-       return jsonify({"msg": "ok"})
-    
+        write_log("All components configured correctly.")
+        return jsonify({"msg": "ok"})
+
     return jsonify(result), 400
 
 
@@ -49,9 +49,9 @@ def configure_adapter():
     result = configurator.configure_adapter(configuration)
 
     if not result:
-       write_log("All components configured correctly.")
-       return jsonify({"msg": "ok"})
-    
+        write_log("All components configured correctly.")
+        return jsonify({"msg": "ok"})
+
     return jsonify(result), 400
 
 

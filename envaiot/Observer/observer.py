@@ -13,7 +13,6 @@ from .utils import (
     get_sender_routing_key,
 )
 from ..utils import write_log
-from ..components import effector
 
 
 class Observer(CommunicationService, MonitorAnalyseService, Thread):
@@ -24,8 +23,7 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
         self.has_adapted_uncertainty = False
         self.adaptation_status = False
         self.scenarios = []
-        self.queue = ''
-        
+        self.queue = ""
 
     def configure(self, communication, scenarios, project_name):
         CommunicationService.__init__(
@@ -54,7 +52,7 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
         self.channel.start_consuming()
 
     def callback(self, ch, method, properties, data):
-        global self.scenarios_sequence, self.has_adapted, self.has_adapted_uncertainty, self.adaptation_scenario
+        from ..components import effector
 
         data = json.loads(data.decode("UTF-8"))
         current_scenario = get_scenario(data, method.routing_key)
@@ -89,15 +87,21 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
                         self.adaptation_status = False
                         print(colored("[FAILED]", "red"), msg_log)
                         write_log(msg_log)
-    
-                        response = effector.adapt(self.adaptation_scenario, "uncertainty")
+
+                        response = effector.adapt(
+                            self.adaptation_scenario, "uncertainty"
+                        )
                         self.has_adapted_uncertainty = True
                         if "success" in response.keys():
                             self.adaptation_status = True
-                            write_log(f"Adapted uncertainty for {self.adaptation_scenario}.")
+                            write_log(
+                                f"Adapted uncertainty for {self.adaptation_scenario}."
+                            )
 
                         else:
-                            msg_log = f"Uncertainty for {self.adaptation_scenario} failed."
+                            msg_log = (
+                                f"Uncertainty for {self.adaptation_scenario} failed."
+                            )
                             write_log(msg_log)
                             self.adaptation_status = False
                             print(colored("[FAILED]", "red"), msg_log)
@@ -122,8 +126,6 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def reset_values(self):
-        global self.has_adapted, self.has_adapted_uncertainty, self.scenarios_sequence, self.adaptation_scenario
-
         self.has_adapted, self.has_adapted_uncertainty = False, False
         self.scenarios_sequence = []
         self.adaptation_scenario = ""

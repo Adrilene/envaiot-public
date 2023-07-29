@@ -7,7 +7,7 @@ from .utils import (
     get_queue_name,
     get_subscribing_routing_key,
 )
-from .utils import write_log
+from ..utils import write_log
 
 
 class DeviceSubscriber(CommunicationService, Thread):

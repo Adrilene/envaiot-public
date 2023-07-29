@@ -6,11 +6,8 @@ from flask import jsonify, request, send_file
 
 from .validator_adapter import validate_adapter
 from .validator_simulator import validate_simulator
-from .assert_scenario import assert_scenario
 
-from ..Simulator.simulator import Simulator
 from ..utils import write_log
-from ..components import simulator, observer, effector
 
 
 devices = []
@@ -21,6 +18,8 @@ load_dotenv()
 
 class Configurator:
     def configure_all(self, configuration):
+        from ..components import simulator, observer, effector
+
         errors_simulator = validate_simulator(configuration)
         errors_adapter = validate_adapter(configuration)
         result = {}
@@ -38,6 +37,7 @@ class Configurator:
                 configuration["scenarios"],
                 configuration["project"],
             )
+            effector.configure(configuration["strategies"])
 
         else:
             result["adapter"] = errors_adapter
@@ -46,6 +46,8 @@ class Configurator:
             return result
 
     def configure_simulator(self, configuration):
+        from ..components import simulator
+
         errors = validate_simulator(configuration)
         result = {}
 
@@ -61,6 +63,8 @@ class Configurator:
             return result
 
     def configure_adapter(self, configuration):
+        from ..components import observer, effector
+
         errors = validate_adapter(configuration)
         result = {}
 

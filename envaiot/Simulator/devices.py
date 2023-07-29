@@ -3,7 +3,7 @@ from flask import jsonify
 from .communication_service import CommunicationService
 from .publisher import DevicePublisher
 from .subscriber import DeviceSubscriber
-from .utils import write_log
+from ..utils import write_log
 
 
 class Device:

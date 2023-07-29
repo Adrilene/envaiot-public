@@ -1,8 +1,8 @@
 from flask import jsonify
 
 from .devices import Device
-from .utils import get_exchange_name
-from .utils import get_current_device, write_log
+from .utils import get_current_device
+from ..utils import get_exchange_name, write_log
 
 
 class Simulator:
