@@ -15,7 +15,7 @@ class Device:
         self.subscriber = DeviceSubscriber(exchange, name, senders)
 
     def get_status(self):
-        return jsonify({"status": self.current_status})
+        return {"status": self.current_status}
 
     def set_status(self, new_status):
         if new_status in self.status:
@@ -23,9 +23,9 @@ class Device:
                 f"{self.name} changed status from {self.current_status} to {new_status}."
             )
             self.current_status = new_status
-            return jsonify({"received": new_status, "new status": self.current_status})
+            return {"received": new_status, "new status": self.current_status}
 
-        return jsonify({"error": "Inexistent Status"})
+        return {"error": "Inexistent Status"}
 
     def create_queue_and_routes(self):
         CommunicationService

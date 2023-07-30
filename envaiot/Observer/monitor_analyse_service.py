@@ -17,8 +17,6 @@ class MonitorAnalyseService:
             return True
 
         for curr_scen in current_scenario:
-            print(f"Current: {curr_scen}")
-            print(f"Adaptation: {adaptation_scenario}")
             if curr_scen not in adaptation_scenario:
                 return False
 
@@ -32,7 +30,6 @@ class MonitorAnalyseService:
             result = self.compare_scenarios(
                 current_scenario, adaptation_scenario[scenario]
             )
-            print(f"RESULT: {result}")
             if not result:
                 continue
 

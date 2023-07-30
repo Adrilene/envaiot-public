@@ -40,13 +40,9 @@ class PlanExecuteService:
         if action_type == "STATUS":
             response = simulator.status(device, body)
         elif action_type == "MESSAGE":
-            response = requests.post(
-                f"{os.getenv('SIMULATOR_HOST')}/{device}/send_message",
-                json={"type": "status", "body": body, "to": device},
-            )
             response = simulator.send_message(
                 device, {"type": "status", "body": body, "to": device}
             )
-        if "Success" in response.keys():
+        if "error" not in response.keys():
             return "success"
         return "fail"

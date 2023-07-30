@@ -61,16 +61,14 @@ class Simulator:
         recipient_device = message.pop("to") if "to" in message.keys() else None
 
         if recipient_device:
-            recipient_device = get_current_device(message["to"], devices)
-            if not recipient_device:
+            if not get_current_device(recipient_device, self.devices):
                 return {"Error": f"Device Not Found {device_name}"}
             write_log(f"{device_name} sent {message} to {recipient_device}.")
 
         else:
             write_log(f"{device_name} published {message}")
 
-        return {
-            "Success": current_device.publisher.publish(
-                message, device_name=device_name, recipient=recipient_device
-            )
-        }
+        r = current_device.publisher.publish(
+            message, device_name=device_name, recipient=recipient_device
+        )
+        return {"Success": r}

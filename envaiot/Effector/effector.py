@@ -15,10 +15,10 @@ class Effector(PlanExecuteService):
         write_log(f"Applying {adapt_type} for {scenario}.")
         if scenario not in self.strategies.keys():
             write_log(f"{scenario} is not configured.\n")
-            return "Scenario not configured."
+            return {"fail": "Scenario not configured."}
 
-        result = self.plan(self.strategies[scenario][adapt_type])
-
+        results = self.plan(self.strategies[scenario][adapt_type])
+        count_fail = 0
         for result in results:
             if result[1] == "fail":
                 count_fail += 1

@@ -18,11 +18,14 @@ def index():
 
 @app.route("/configure_all", methods=["POST"])
 def configure_all():
+    f = open(f"./{os.getenv('LOGS_PATH')}", "w")
+    f.write("")
+
     configuration = dict(request.json)
     result = configurator.configure_all(configuration)
-    if not result:
+    if type(result) is not dict:
         write_log("All components configured correctly.")
-        return jsonify({"msg": "ok"})
+        return jsonify(result)
 
     return jsonify(result), 400
 

@@ -26,5 +26,4 @@ class DevicePublisher(CommunicationService):
             body=json.dumps(message),
         )
 
-        print(f"PUBLISH {device_name} | {message} | {rk}")
         return f"{device_name} published in {rk}"

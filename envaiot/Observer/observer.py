@@ -52,78 +52,48 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
         self.channel.start_consuming()
 
     def callback(self, ch, method, properties, data):
-        from ..components import effector
+        from ..components import effector, condition
 
         data = json.loads(data.decode("UTF-8"))
         current_scenario = get_scenario(data, method.routing_key)
 
         write_log(f"Observer received: {data} from {method.routing_key}.")
 
-        if self.analyse_normal_scenario(current_scenario, self.scenarios["normal"]):
-            if self.has_adapted or self.has_adapted_uncertainty:
-                msg_log = f"Adaptation worked successfully."
-                self.adaptation_status = True
-                print(colored("[SUCCESS]", "green"), msg_log)
-                write_log(msg_log)
-                self.reset_values()
-            write_log(f"System is under a normal scenario.")
+        if self.analyse_normal_scenario and self.has_adapted:
+            self.reset_values()
+            write_log(f"System adapted successfully.")
+
         else:
             self.scenarios_sequence.append(current_scenario)
-            adaptation = self.analyse_adaptation_scenario(
+            result = self.analyse_adaptation_scenario(
                 self.scenarios_sequence, self.scenarios["adaptation"]
             )
-            if adaptation != "wait" and adaptation != False:
-                if adaptation != "uncertainty":
-                    write_log(f"Scenario {adaptation} detected.")
-                    self.adaptation_scenario = adaptation
-                    response = effector.adapt(self.adaptation_scenario, "adaptation")
-                    self.has_adapted = True
-                    if "success" in response.keys():
-                        self.adaptation_status = True
-                        write_log(f"Adapted for {self.adaptation_scenario}.")
-                        self.reset_values()
-                    else:
-                        msg_log = f"Adaptation failed for {self.adaptation_scenario}. Adapting uncertainty..."
-                        self.adaptation_status = False
-                        print(colored("[FAILED]", "red"), msg_log)
-                        write_log(msg_log)
-
-                        response = effector.adapt(
-                            self.adaptation_scenario, "uncertainty"
-                        )
-                        self.has_adapted_uncertainty = True
-                        if "success" in response.keys():
-                            self.adaptation_status = True
-                            write_log(
-                                f"Adapted uncertainty for {self.adaptation_scenario}."
-                            )
-
-                        else:
-                            msg_log = (
-                                f"Uncertainty for {self.adaptation_scenario} failed."
-                            )
-                            write_log(msg_log)
-                            self.adaptation_status = False
-                            print(colored("[FAILED]", "red"), msg_log)
-                        self.reset_values()
-                else:
-                    write_log(f"Uncertainty detected for {self.adaptation_scenario}.")
-                    response = effector.adapt(self.adaptation_scenario, "uncertainty")
-                    self.has_adapted_uncertainty = True
-                    if "success" in response.keys():
-                        msg_log = f"Adapted uncertainty for {self.adaptation_scenario}."
-                        self.adaptation_status = True
-                        print(colored("[SUCCESS]", "green"), msg_log)
-                        write_log(msg_log)
-
-                    else:
-                        msg_log = f"Uncertainty for {self.adaptation_scenario} failed."
-                        write_log(msg_log)
-                        self.adaptation_status = False
-                        print(colored("[FAILED]", "red"), msg_log)
+            if result in self.scenarios["adaptation"].keys():
+                self.adaptation_scenario = result
+                write_log(f"Scenario {self.adaptation_scenario} detected.")
+                self.has_adapted = True
+                resultA = effector.adapt(self.adaptation_scenario, "adaptation")
+                if "success" in resultA.keys():
+                    self.adaptation_status = True
                     self.reset_values()
 
+            elif result == "uncertainty":
+                self.has_adapted_uncertainty = True
+                write_log(
+                    f"Uncertainty for scenario {self.adaptation_scenario} detected."
+                )
+                if (
+                    "success"
+                    in effector.adapt(self.adaptation_scenario, "uncertainty").keys()
+                ):
+                    self.adaptation_status = True
+                    self.reset_values()
+            elif result != "wait":
+                self.adaptation_status = False
+                self.reset_values()
         ch.basic_ack(delivery_tag=method.delivery_tag)
+        with condition:
+            condition.notify_all()
 
     def reset_values(self):
         self.has_adapted, self.has_adapted_uncertainty = False, False
