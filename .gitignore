@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 .vscode/settings.json
 envaiot/Simulator/simulator.py
+Logs/logs.txt
