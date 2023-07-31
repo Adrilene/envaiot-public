@@ -3,8 +3,9 @@ import os
 
 
 class CommunicationService:
-    def __init__(self, exchange):
-        connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+    def __init__(self, exchange, host):
+        params = pika.URLParameters(host)
+        connection = pika.BlockingConnection(params)
         self.channel = connection.channel()
         self.exchange = exchange
         self.declare_exchange(exchange)

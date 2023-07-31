@@ -9,13 +9,14 @@ class Simulator:
     def __init__(self):
         self.devices = []
 
-    def configure(self, resources, project):
+    def configure(self, resources, project, communication):
         self.devices = []
         exchange_name = get_exchange_name(project)
         for device in resources.keys():
             status = resources[device]["status"] + ["active", "inactive"]
             senders = resources[device]["senders"]
-            self.devices.append(Device(device, status, senders, exchange_name))
+            host = communication["host"]
+            self.devices.append(Device(device, status, senders, exchange_name, host))
 
         for device in self.devices:
             device.subscriber.start()

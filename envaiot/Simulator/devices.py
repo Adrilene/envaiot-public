@@ -7,12 +7,12 @@ from ..utils import write_log
 
 
 class Device:
-    def __init__(self, name, status, senders, exchange):
+    def __init__(self, name, status, senders, exchange, host):
         self.name = name
         self.status = status
         self.current_status = self.status[0]
-        self.publisher = DevicePublisher(exchange, name)
-        self.subscriber = DeviceSubscriber(exchange, name, senders)
+        self.publisher = DevicePublisher(exchange, name, host)
+        self.subscriber = DeviceSubscriber(exchange, name, senders, host)
 
     def get_status(self):
         return {"status": self.current_status}
@@ -27,5 +27,5 @@ class Device:
 
         return {"error": "Inexistent Status"}
 
-    def create_queue_and_routes(self):
-        CommunicationService
+    # def create_queue_and_routes(self, exchange, host):
+    #     CommunicationService(exchange, host)

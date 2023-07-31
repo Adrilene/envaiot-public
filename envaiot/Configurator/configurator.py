@@ -28,7 +28,11 @@ class Configurator:
 
         if not errors_simulator:
             write_log(f"Simulator modeling is correct. Starting to configurate...")
-            simulator.configure(configuration["resources"], configuration["project"])
+            simulator.configure(
+                configuration["resources"],
+                configuration["project"],
+                configuration["communication"],
+            )
         else:
             result["simulator"] = errors_simulator
 
@@ -62,7 +66,9 @@ class Configurator:
         if not errors:
             write_log(f"Simulator modeling is correct. Starting to configurate...")
             result["simulator"] = simulator.configure(
-                configuration["resources"], configuration["project"]
+                configuration["resources"],
+                configuration["project"],
+                configuration["communication"],
             )
         else:
             result["simulator"] = errors

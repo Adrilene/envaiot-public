@@ -1,8 +1,14 @@
 from pyrabbit.api import Client
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_bindings(host, user, password, exchange):
     client = Client(host, user, password)
+    if "localhost" not in host:
+        client.http.base_url = f"https://{os.getenv('AMQP_HOST')}/api/"
     bindings = client.get_bindings()
     bindings_result = []
 

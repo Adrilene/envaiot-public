@@ -1,10 +1,11 @@
 import pika
-import os
 
 
 class CommunicationService:
     def __init__(self, exchange, host):
-        connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        params = pika.URLParameters(host)
+        connection = pika.BlockingConnection(params)
+        # connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
         self.channel = connection.channel()
         self.exchange = exchange
         try:

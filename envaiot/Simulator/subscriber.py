@@ -11,8 +11,8 @@ from ..utils import write_log
 
 
 class DeviceSubscriber(CommunicationService, Thread):
-    def __init__(self, exchange, device_name, senders):
-        CommunicationService.__init__(self, exchange)
+    def __init__(self, exchange, device_name, senders, host):
+        CommunicationService.__init__(self, exchange, host)
         Thread.__init__(self)
         self.device_name = device_name
         queue = get_queue_name(device_name)

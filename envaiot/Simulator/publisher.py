@@ -7,8 +7,8 @@ from .utils import get_publishing_routing_key, get_subscribing_routing_key
 
 
 class DevicePublisher(CommunicationService):
-    def __init__(self, exchange, device_name):
-        CommunicationService.__init__(self, exchange)
+    def __init__(self, exchange, device_name, host):
+        CommunicationService.__init__(self, exchange, host)
         self.routing_key = get_publishing_routing_key(device_name)
 
     def publish(self, message, device_name, recipient):
