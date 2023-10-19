@@ -161,3 +161,8 @@ cython_debug/
 .vscode/settings.json
 envaiot/Simulator/simulator.py
 Logs/logs.txt
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
