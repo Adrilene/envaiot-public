@@ -11,8 +11,9 @@ class Effector(PlanExecuteService):
     def __init__(self):
         self.strategies = {}
 
-    def configure(self, configuration):
+    def configure(self, configuration, simulator):
         self.strategies = strategies_to_dict(configuration["strategies"])
+        self.simulator = simulator
 
     def adapt(self, scenario, adapt_type):
         global results
@@ -22,7 +23,7 @@ class Effector(PlanExecuteService):
             write_log(f"{scenario} is not configured.\n")
             return {"fail": "Scenario not configured."}
 
-        results = self.plan(self.strategies[scenario][adapt_type])
+        results = self.plan(self.strategies[scenario][adapt_type], self.simulator)
         count_fail = 0
         for result in results:
             if result[1] == "fail":
@@ -43,7 +44,9 @@ class Effector(PlanExecuteService):
             if result[1] != "fail":
                 if result[1] == "STATUS":
                     write_log(f"Returning {result[0]} to {result[2]}...")
-                    result = self.execute(result[0], result[1], result[2])
+                    result = self.execute(
+                        result[0], result[1], result[2], self.simulator
+                    )
                     responses.append(result)
                     msg_log = f"Cautious adaptation result is {result}"
                     write_log(msg_log)

@@ -19,10 +19,6 @@ load_dotenv()
 
 class Configurator:
     def configure_all(self, configuration, simulator, observer, effector):
-        # from ..Simulator.simulator import Simulator
-        # from ..Observer.observer import Observer
-        # from ..Effector.effector import Effector
-
         if os.path.exists(f"../{os.getenv('LOGS_PATH')}"):
             now = datetime.now()
             new_name = f"../{os.getenv('LOGS_PATH')}".replace(
@@ -53,19 +49,20 @@ class Configurator:
             "communication": configuration["communication"],
             "scenarios": configuration["scenarios"],
         }
-        observer.configure(observer_configuration)
 
         effector_configuration = {
             "strategies": configuration["strategies"],
         }
-        effector.configure(effector_configuration)
+        effector.configure(effector_configuration, simulator)
+        observer.configure(observer_configuration, effector)
+        observer.start()
 
         write_log(f"Components configured:")
         write_log(f"Simulator: {simulator_configuration}")
         write_log(f"Obsever: {observer_configuration}")
         write_log(f"Effector: {effector_configuration}")
 
-        return assert_scenario(configuration["scenarios"])
+        return assert_scenario(configuration["scenarios"], simulator)
 
     def validate_scenario(scenario):
         return assert_scenario(scenario)

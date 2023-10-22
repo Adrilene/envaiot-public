@@ -11,7 +11,7 @@ load_dotenv()
 
 
 def analyse_result(scenario):
-    with open(f"../{os.getenv('LOGS_PATH')}", "r") as f:
+    with open(f"{os.getenv('LOGS_PATH')}", "r") as f:
         lines = f.readlines()
         for line in lines:
             if scenario in line and "success" in line:
@@ -19,26 +19,24 @@ def analyse_result(scenario):
         return 400
 
 
-def send_message(scenario):
-    from ..Simulator.simulator import Simulator
-
+def send_message(scenario, simulator):
     results = []
     message = deepcopy(scenario)
     message["body"] = scenario["body"] if "body" in scenario.keys() else ""
     if "receiver" in scenario:
         message["to"] = scenario["receiver"]
         receiver = message.pop("receiver")
-        result = Simulator.send_message(receiver, message)
+        result = simulator.send_message(receiver, message)
         results.append(200 if "success" in result.keys() else 400)
     elif "sender" in scenario:
         sender = message.pop("sender")
-        result = Simulator.send_message(sender, message)
+        result = simulator.send_message(sender, message)
         results.append(200 if "success" in result.keys() else 400)
 
     return results
 
 
-def assert_scenario(scenarios):
+def assert_scenario(scenarios, simulator):
     msg = []
     for scenario_name in scenarios["adaptation"].keys():
         results = []
@@ -46,7 +44,7 @@ def assert_scenario(scenarios):
         write_log(f"Asserting scenario {scenario_name}...")
 
         for scenario in scenarios["adaptation"][scenario_name]["scenario"]:
-            results.extend(send_message(scenario))
+            results.extend(send_message(scenario, simulator))
             count += 1
             sleep(count + 1)
 

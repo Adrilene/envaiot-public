@@ -56,9 +56,9 @@ class Simulator:
         return current_device.set_status(new_status)
 
     def send_message(self, device_name, message):
-        current_device = get_current_device(device_name, devices)
+        current_device = get_current_device(device_name, self.devices)
         if "to" in message.keys():
-            recipient_device = get_current_device(message["to"], devices)
+            recipient_device = get_current_device(message["to"], self.devices)
             if not recipient_device:
                 msg = f"Device Not Found {device_name}"
                 write_log(msg)

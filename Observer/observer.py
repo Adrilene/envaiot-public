@@ -30,7 +30,7 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
         self.scenarios = []
         self.queue = ""
 
-    def configure(self, configuration):
+    def configure(self, configuration, effector):
         CommunicationService.__init__(
             self,
             get_exchange_name(configuration["project"]),
@@ -40,11 +40,12 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
         self.scenarios = self.get_scenarios(configuration["scenarios"])
         self.queue = "observer"
         self.declare_queue(self.queue)
+        self.effector = effector
         subscribe_in_all_queues(
             configuration["communication"]["host"],
             configuration["communication"]["user"],
             configuration["communication"]["password"],
-            get_exchange_name(configuration["project_name"]),
+            get_exchange_name(configuration["project"]),
             self.queue,
             self.channel,
         )
@@ -60,7 +61,7 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
 
     def callback(self, ch, method, properties, data):
         global scenarios_sequence, has_adapted, has_adapted_uncertainty, adaptation_scenario
-        from ..Effector.effector import Effector
+        # from ..Effector.effector import Effector
 
         data = json.loads(data.decode("UTF-8"))
         current_scenario = get_scenario(data, method.routing_key)
@@ -77,7 +78,7 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
             if has_adapted or has_adapted_uncertainty:
                 if self.scenarios["adaptation"][adaptation_scenario]["cautious"]:
                     write_log(f"Resetting to previous state")
-                    response = Effector.return_to_previous_state()
+                    response = self.effector.return_to_previous_state()
                     if "success" in response.keys():
                         write_log("Resource reset successfully")
                     else:
@@ -93,7 +94,7 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
                 if adaptation != "uncertainty":
                     write_log(f"Scenario {adaptation} detected.")
                     adaptation_scenario = adaptation
-                    response = Effector.adapt(adaptation_scenario, "adaptation")
+                    response = self.effector.adapt(adaptation_scenario, "adaptation")
                     has_adapted = True
                     if "success" in response.keys():
                         write_log(f"Adapted for {adaptation_scenario} successfully.")
@@ -102,7 +103,9 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
                     else:
                         msg_log = f"Adaptation failed for {adaptation_scenario}. Adapting uncertainty..."
                         write_log(msg_log)
-                        response = Effector.adapt(adaptation_scenario, "uncertainty")
+                        response = self.effector.adapt(
+                            adaptation_scenario, "uncertainty"
+                        )
                         scenarios_sequence = []
                         has_adapted_uncertainty = True
                         if "success" in response.keys():
