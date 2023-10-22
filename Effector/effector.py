@@ -36,7 +36,7 @@ class Effector(PlanExecuteService):
         msg = f"{adapt_type} for {scenario} applied successfully"
         return {"success": msg}
 
-    def return_to_previous_state():
+    def return_to_previous_state(self):
         global results
 
         responses = []

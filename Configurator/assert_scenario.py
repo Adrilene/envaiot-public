@@ -57,7 +57,7 @@ def assert_scenario(scenarios, simulator):
         if results.count(200) == len(results):
             if scenarios["adaptation"][scenario_name]["cautious"]:
                 for scenario in scenarios["normal"]:
-                    results.extend(send_message(scenario))
+                    results.extend(send_message(scenario, simulator))
                     sleep(1)
                 result = analyse_result("Cautious")
                 if result == 200:
