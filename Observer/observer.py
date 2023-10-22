@@ -61,7 +61,6 @@ class Observer(CommunicationService, MonitorAnalyseService, Thread):
 
     def callback(self, ch, method, properties, data):
         global scenarios_sequence, has_adapted, has_adapted_uncertainty, adaptation_scenario
-        # from ..Effector.effector import Effector
 
         data = json.loads(data.decode("UTF-8"))
         current_scenario = get_scenario(data, method.routing_key)
