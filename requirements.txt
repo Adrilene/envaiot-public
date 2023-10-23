@@ -9,7 +9,9 @@ confection==0.0.3
 contourpy==1.0.5
 cycler==0.11.0
 cymem==2.0.7
+distlib==0.3.7
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.0/en_core_web_sm-3.4.0-py3-none-any.whl
+filelock==3.12.2
 Flask==2.3.2
 fonttools==4.37.4
 httplib2==0.22.0
@@ -31,7 +33,8 @@ pathspec==0.10.1
 pathy==0.6.2
 pika==1.3.2
 Pillow==9.2.0
-platformdirs==2.5.2
+pipenv==2023.7.23
+platformdirs==3.10.0
 preshed==3.0.8
 pydantic==1.9.2
 pyparsing==3.0.9
@@ -58,6 +61,8 @@ tqdm==4.64.1
 typer==0.4.2
 typing_extensions==4.4.0
 urllib3==1.26.12
+virtualenv==20.24.2
+virtualenv-clone==0.5.7
 wasabi==0.10.1
 Werkzeug==2.3.6
 yellowbrick==1.5

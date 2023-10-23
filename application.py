@@ -1,5 +1,6 @@
 import os
 
+from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, send_file
 
@@ -18,6 +19,12 @@ def index():
 
 @application.route("/configure_all", methods=["POST"])
 def configure_all():
+    if os.path.exists(f"../{os.getenv('LOGS_PATH')}"):
+        now = datetime.now()
+        new_name = f"{os.getenv('LOGS_PATH')}".replace(
+            "logs", f"logs_{now.strftime('%d%m%Y%H%M')}"
+        )
+        os.rename(f"{os.getenv('LOGS_PATH')}", new_name)
     f = open(f"{os.getenv('LOGS_PATH')}", "w")
     f.write("")
 

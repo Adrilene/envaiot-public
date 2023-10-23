@@ -6,8 +6,6 @@ load_dotenv()
 
 class PlanExecuteService:
     def plan(self, actions, simulator):
-        # from ..Simulator.simulator import Simulator
-
         device = ""
         results = []
         for action in actions:
@@ -32,8 +30,6 @@ class PlanExecuteService:
         return results
 
     def execute(self, device, action_type, body, simulator):
-        # from ..Simulator.simulator import Simulator
-
         if action_type == "STATUS":
             response = simulator.status(device, body)
 
