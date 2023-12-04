@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from threading import Thread
-from termcolor import colored
+
 
 from .communication_service import CommunicationService
 from .connection import subscribe_in_all_queues
