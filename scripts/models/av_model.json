@@ -1,0 +1,90 @@
+{
+	"project": "Autonomous Vehicle",
+	"resources": {
+		"AlcoholSensor": {
+			"status": [
+				"normal",
+				"high"
+			],
+			"senders": []
+		},
+		"SpeedSensor": {
+			"status": [
+				"normal",
+				"high"
+			],
+			"senders": []
+		},
+		"Brake": {
+			"status": [
+				"manual",
+				"assistance"
+			],
+			"senders": []
+		},
+		"Steering": {
+			"status": [
+				"manual",
+				"assistance"
+			],
+			"senders": []
+		},
+		"Manager": {
+			"status": [],
+			"senders": [
+				"AlcoholSensor",
+				"SpeedSensor"
+			]
+		}
+	},
+	"communication": {
+		"user": "suzejnmu",
+		"host": "amqps://suzejnmu:QKPZJOQih6_wr5vi3ZJSKThnqyMTe_L8@jackal.rmq.cloudamqp.com/suzejnmu",
+		"password": "QKPZJOQih6_wr5vi3ZJSKThnqyMTe_L8"
+	},
+	"scenarios": {
+		"normal": [
+			{
+				"sender": "AlcoholSensor",
+				"type": "status",
+				"body": {
+					"AlcoholLevel": "normal"
+				}
+			},
+			{
+				"sender": "SpeedSensor",
+				"type": "status",
+				"body": {
+					"Speed": "normal"
+				}
+			}
+		],
+		"adaptation": {
+			"HighAlcohol": {
+				"cautious": true,
+				"scenario": [
+					{
+						"sender": "AlcoholSensor",
+						"type": "status",
+						"body": {
+							"AlcoholLevel": "high"
+						}
+					}
+				]
+			},
+			"HighSpeed": {
+				"cautious": true,
+				"scenario": [
+					{
+						"sender": "SpeedSensor",
+						"type": "status",
+						"body": {
+							"Speed": "high"
+						}
+					}
+				]
+			}
+		}
+	},
+	"strategies": "IF HighAlcohol THEN ON Steering STATUS assistance OTHERWISE ON Manager MESSAGE 'Send message to emergency contact' IF HighSpeed THEN ON Brake STATUS assistance OTHERWISE ON Manager MESSAGE 'Send message to emergency contact'"
+}

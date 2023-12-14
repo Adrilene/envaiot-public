@@ -1,0 +1,66 @@
+{
+	"project": "Baby Monitor Project",
+	"resources": {
+		"SmartTV": {
+			"status": [
+				"blocked",
+				"available"
+			],
+			"senders": []
+		},
+		"BabyMonitor": {
+			"status": [],
+			"senders": []
+		},
+		"Smartphone": {
+			"status": [],
+			"senders": [
+				"BabyMonitor",
+				"SmartTV"
+			]
+		},
+		"SmartLamp": {
+			"status": [
+				"on",
+				"off"
+			],
+			"senders": []
+		},
+		"Assistant": {
+			"status": [],
+			"senders": []
+		}
+	},
+	"communication": {
+		"user": "suzejnmu",
+		"host": "amqps://suzejnmu:QKPZJOQih6_wr5vi3ZJSKThnqyMTe_L8@jackal.rmq.cloudamqp.com/suzejnmu",
+		"password": "QKPZJOQih6_wr5vi3ZJSKThnqyMTe_L8"
+	},
+	"scenarios": {
+		"normal": [
+			{
+				"sender": "BabyMonitor",
+				"type": "status"
+			}
+		],
+		"adaptation": {
+			"TVBlocked": {
+				"cautious": true,
+				"scenario": [
+					{
+						"receiver": "SmartTV",
+						"type": "notification"
+					},
+					{
+						"sender": "SmartTV",
+						"type": "status",
+						"body": {
+							"block": true
+						}
+					}
+				]
+			}
+		}
+	},
+	"strategies": "IF TVBlocked THEN ON SmartTV STATUS available OTHERWISE ON Assistant MESSAGE 'The baby needs attention' ON SmartLamp STATUS blink"
+}

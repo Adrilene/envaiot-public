@@ -1,0 +1,127 @@
+{
+	"project": "Smart Home Project",
+	"resources": {
+		"AirConditioner": {
+			"status": [
+				"off",
+				"on"
+			],
+			"senders": []
+		},
+		"Lamp": {
+			"status": [
+				"off",
+				"on"
+			],
+			"senders": []
+		},
+		"Windows": {
+			"status": [
+				"closed",
+				"open"
+			],
+			"senders": []
+		},
+		"Humidifier": {
+			"status": [
+				"on",
+				"off"
+			],
+			"senders": []
+		},
+		"Manager": {
+			"status": [],
+			"senders": [
+				"AirConditioner",
+				"Lamp",
+				"Windows",
+				"Humidifier"
+			]
+		}
+	},
+	"communication": {
+		"user": "suzejnmu",
+		"host": "amqps://suzejnmu:QKPZJOQih6_wr5vi3ZJSKThnqyMTe_L8@jackal.rmq.cloudamqp.com/suzejnmu",
+		"password": "QKPZJOQih6_wr5vi3ZJSKThnqyMTe_L8"
+	},
+	"scenarios": {
+		"normal": [
+			{
+				"receiver": "Manager",
+				"type": "status",
+				"body": {
+					"presence": false
+				}
+			}
+		],
+		"adaptation": {
+			"ACOn": {
+				"cautious": false,
+				"scenario": [
+					{
+						"receiver": "Manager",
+						"type": "status",
+						"body": {
+							"presence": true
+						}
+					},
+					{
+						"receiver": "Manager",
+						"type": "status",
+						"body": {
+							"temperature": 30,
+							"status": "off"
+						}
+					}
+				]
+			},
+			"ACOff": {
+				"cautious": false,
+				"scenario": [
+					{
+						"receiver": "Manager",
+						"type": "status",
+						"body": {
+							"presence": true
+						}
+					},
+					{
+						"receiver": "Manager",
+						"type": "status",
+						"body": {
+							"temperature": 20,
+							"status": "on"
+						}
+					}
+				]
+			},
+			"LightHumidity": {
+				"cautious": false,
+				"scenario": [
+					{
+						"receiver": "Manager",
+						"type": "status",
+						"body": {
+							"presence": true
+						}
+					},
+					{
+						"receiver": "Manager",
+						"type": "status",
+						"body": {
+							"luminosity": "low"
+						}
+					},
+					{
+						"receiver": "Manager",
+						"type": "status",
+						"body": {
+							"humidity": "low"
+						}
+					}
+				]
+			}
+		}
+	},
+	"strategies": "IF ACOn THEN ON AirConditioner STATUS on OTHERWISE ON Manager MESSAGE 'Could not turn on the air conditioner' IF ACOff THEN ON AirConditioner STATUS off OTHERWISE ON Manager MESSAGE 'Could not turn off the air conditioner' IF LightHumidity THEN ON Windows STATUS open OTHERWISE ON Lamp STATUS on ON Humidifier STATUS on"
+}

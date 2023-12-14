@@ -2,8 +2,7 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
-from flask import jsonify, request, send_file
-from threading import Thread
+from flask import send_file
 
 from .validator_adapter import validate_adapter
 from .validator_simulator import validate_simulator
